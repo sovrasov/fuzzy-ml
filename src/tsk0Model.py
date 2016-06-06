@@ -18,6 +18,33 @@ class TSK0():
                      for i in range(self.inputDimension)]
         return np.prod(expValues)
 
+    def getParametersBounds(self):
+        lBound = []
+        uBound = []
+
+        for i in range(self.numberOfRules):
+            lBound.extend([0.0]*self.inputDimension)
+            uBound.extend([1.0]*self.inputDimension)
+
+        lBound.extend([0.0] * (2 * self.numberOfRules))
+        uBound.extend([float('inf')] * (2 * self.numberOfRules))
+
+        return lBound, uBound
+
+    def code(self):
+        parameters = []
+        for center in self.centers:
+            parameters.extend(center)
+        parameters.extend(self.vars)
+        parameters.extend(self.b)
+        return parameters
+
+    def decode(self, parameters):
+        for i in range(self.numberOfRules):
+            self.centers[i] = parameters[i*self.inputDimension : (i+1)*self.inputDimension]
+        self.vars = parameters[self.numberOfRules*self.inputDimension : self.numberOfRules*self.inputDimension + self.numberOfRules]
+        self.b = parameters[self.numberOfRules*(self.inputDimension + 1 ) :]
+
     def initFromClusters(self, clusterCenters, x, y, numberOfClasses):
         self.centers = clusterCenters
         self.numberOfRules = len(clusterCenters)
