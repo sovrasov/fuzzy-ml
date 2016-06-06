@@ -3,6 +3,14 @@
 import random
 import numpy
 
+def splitDataset(x, y, testRatio = 0.2):
+    data = zip(x, y)
+    trainSize = int((1.0 - testRatio)*len(y))
+    random.shuffle(data)
+    xTrain, yTrain = zip(*data[:trainSize])
+    xTest, yTest = zip(*data[trainSize:])
+    return xTrain, yTrain, xTest, yTest
+
 def random_floats(low, high, size):
     return [random.uniform(low, high) for _ in range(size)]
 

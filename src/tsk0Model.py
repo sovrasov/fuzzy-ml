@@ -13,8 +13,9 @@ class TSK0():
         self.inputDimension = 0
         self.numberOfClasses = 0
 
-    def __evaluateConfidence(self, classID, x):
-        expValues = [np.exp((-0.5*(x[i] - self.centers[classID][i])**2)/self.vars[classID]**2) for i in range(self.inputDimension)]
+    def __evaluateConfidence(self, ruleID, x):
+        expValues = [np.exp(-0.5*((x[i] - self.centers[ruleID][i]) / self.vars[ruleID])**2)
+                     for i in range(self.inputDimension)]
         return np.prod(expValues)
 
     def initFromClusters(self, clusterCenters, x, y, numberOfClasses):
@@ -35,14 +36,17 @@ class TSK0():
 
         for i in range(self.numberOfRules):
             confidences = [self.__evaluateConfidence(i, vector) for vector in x]
-            multiplicatedConfidences = [confidences[i]*y[i] for i in range(len(y))]
+            multiplicatedConfidences = np.multiply(confidences, y)
             self.b.append(np.sum(multiplicatedConfidences) / np.sum(confidences))
 
-        print(self.b)
+        #print(self.b)
 
     def predict(self, x):
-        #firstLayersOutput = 
-        return 3
+        firstLayersOutput = [self.__evaluateConfidence(i, x) for i in range(self.numberOfRules)]
+        sum2 = np.sum(firstLayersOutput)
+        sum1 = np.sum(np.multiply(firstLayersOutput, self.b))
+        #print(sum1 / sum2 - 0.5)
+        return np.ceil(sum1 / sum2 - 0.5)
 
     def score(self, x, y):
         answers = [self.predict(vector) for vector in x]
