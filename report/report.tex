@@ -1,0 +1,117 @@
+\documentclass[a4paper, 12pt]{extarticle}
+
+\usepackage{tikz}
+\usepackage{xecyr}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fontenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{xltxtra}
+\usepackage{textcomp}
+\usepackage{graphicx}
+\usepackage{csquotes}
+\usepackage{longtable}
+\usepackage{indentfirst}
+\usepackage{unicode-math}
+\usepackage[english, russian]{babel}
+\usepackage[width=1.2\textwidth]{caption}
+
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\fontsize{14}{15}\bfseries}{\thesection}{5pt}{}
+\titleformat{\subsection}
+  {\normalfont\fontsize{14}{15}\bfseries}{\thesubsection}{5pt}{}
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{14}{15}\bfseries}{\thesubsubsection}{5pt}{}
+
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont[Ligatures=TeX]{Times New Roman}
+
+\usepackage[a4paper,margin=1in,heightrounded]{geometry}
+\geometry{left=25mm}
+\geometry{right=15mm}
+\geometry{top=2cm}
+\geometry{bottom=2cm}
+
+\usepackage{expl3}
+\ExplSyntaxOn
+\cs_new_eq:NN \customRep \prg_replicate:nn
+\ExplSyntaxOff
+
+\usepackage{setspace}
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{2mm}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{2mm}{}
+\titleformat{\subsubsection}{\normalfont\large\bfseries}{\thesubsubsection.}{2mm}{}
+
+\usepackage[
+  maxnames=5,
+  %backend=biber,
+  backend=bibtex,
+  %style=gost-numeric,
+  sorting=none,
+  autolang=other]{biblatex}
+\addbibresource{refs.bib}
+
+
+% Sections style redefinition
+\renewcommand{\thesection}
+  {\thepart\arabic{section}}
+\renewcommand{\thesubsection}
+  {\thepart\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}
+  {\thepart\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+% Equations, fugures, tables numbering style redefinition
+\renewcommand{\theequation}
+  {\thesection.\arabic{equation}}
+\renewcommand{\thefigure}
+  {\thesection.\arabic{figure}}
+\renewcommand{\thetable}
+  {\thesection.\arabic{table}}
+
+% Enum style redefinition
+\renewcommand{\labelenumii}
+  {\labelenumi\arabic{enumii}.}
+\renewcommand{\labelenumiii}
+  {\labelenumii\arabic{enumiii}.}
+
+% Enlarge table row height
+\renewcommand{\arraystretch}{1.2}
+
+% Equal sign with def sbove
+\newcommand{\eqdef}{\overset{\mathrm{def}}{=\joinrel=}}
+
+\DeclareMathOperator{\acc}{acc}
+\DeclareMathOperator{\diff}{diff}
+\usepackage[linesnumbered,boxed]{algorithm2e}
+\SetAlgorithmName{Алгоритм}{алгоритм}{Список алгоритмов}
+
+\usetikzlibrary{trees}
+
+\begin{document}
+\input{report_titlepage}
+\setcounter{page}{2}
+
+\newpage\tableofcontents
+
+\newpage
+%\input{introduction}
+%\input{problem}
+%\input{method}
+%\input{implementation}
+%\input{experiments}
+%\input{conclusion}
+
+\newpage\nocite{*}
+\addcontentsline{toc}{section}{Список литературы}
+\printbibliography
+
+\end{document}
