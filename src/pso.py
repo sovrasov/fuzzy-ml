@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Copyright (C) 2016 Sovrasov - All Rights Reserved
+Copyright (C) 2016 Sovrasov V. - All Rights Reserved
  * You may use, distribute and modify this code under the
  * terms of the MIT license.
  * You should have received a copy of the MIT license with

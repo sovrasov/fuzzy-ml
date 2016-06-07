@@ -98,16 +98,16 @@
 
 \begin{document}
 \input{report_titlepage}
-\setcounter{page}{2}
 
 \newpage\tableofcontents
+\thispagestyle{empty}
 
 \newpage
-%\input{introduction}
-%\input{problem}
-%\input{method}
-%\input{implementation}
-%\input{experiments}
+\setcounter{page}{1}
+\input{problem}
+\input{method}
+\input{implementation}
+\input{experiments}
 %\input{conclusion}
 
 \newpage\nocite{*}
