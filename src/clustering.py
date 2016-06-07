@@ -1,4 +1,12 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+Copyright (C) 2016 Sovrasov - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+'''
 
 from miscFunctions import *
 import numpy as np
@@ -8,10 +16,10 @@ def getKohonenClusters(vectors, numberOfClusters = 15):
     eps = 10e-4
     maxIters = 10
     winsCounters = [1] * numberOfClusters
-    alphaR = 0.01
+    alphaR = 0.05
     alphaW = 0.6
 
-    clusterCenters = [np.array(random_floats(0., 1., vecSize)) for _ in range(numberOfClusters)]
+    clusterCenters = [np.array(random_floats(0., 1., vecSize)) for _ in xrange(numberOfClusters)]
     oldClustersCenters = np.copy(clusterCenters)
     clustersDist = float('inf')
     iters = 0
@@ -19,18 +27,17 @@ def getKohonenClusters(vectors, numberOfClusters = 15):
     while iters < maxIters and clustersDist > eps:
         totalWins = np.sum(winsCounters)
         for vector in vectors:
-            distances = [winsCounters[i] * dist(clusterCenters[i], vector) / totalWins for i in range(numberOfClusters)]
+            distances = [winsCounters[i] * dist(clusterCenters[i], vector) / totalWins \
+                for i in xrange(numberOfClusters)]
             w = np.argmin(distances)
             distances[w] = float('inf')
             r = np.argmin(distances)
-            #if r == w:
-            #    print('error')
             clusterCenters[w] += alphaW * (vector - clusterCenters[w])
             clusterCenters[r] -= alphaR * (vector - clusterCenters[r])
             winsCounters[w] += 1
 
         clustersDist = 0.0
-        for i in range(numberOfClusters):
+        for i in xrange(numberOfClusters):
             clustersDist += dist(clusterCenters[i], oldClustersCenters[i])
         clustersDist /= numberOfClusters
         oldClustersCenters = np.copy(clusterCenters)

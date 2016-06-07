@@ -1,13 +1,21 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+Copyright (C) 2016 Sovrasov - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+'''
 
 import random
-import numpy
+import numpy as np
 
 def getTSK0Score(model, params, xTest, yTest):
     model.decode(params)
     error = 0.0
-    for i in range(len(xTest)):
-        error += (yTest[i] - model.predict(xTest[i]))**2
+    for i in xrange(len(xTest)):
+        error += (yTest[i] - model.predictRaw(xTest[i]))**2
     return error / len(xTest)
 
 def splitDataset(x, y, testRatio = 0.2):
@@ -19,17 +27,14 @@ def splitDataset(x, y, testRatio = 0.2):
     return xTrain, yTrain, xTest, yTest
 
 def random_floats(low, high, size):
-    return [random.uniform(low, high) for _ in range(size)]
+    return [random.uniform(low, high) for _ in xrange(size)]
 
 def dist(x, y, squared = True):
     if squared:
-        return numpy.sum((x - y)**2)
-    return numpy.sqrt(numpy.sum((x - y)**2))
+        return np.sum((x - y)**2)
+    return np.sqrt(numpy.sum((x - y)**2))
 
-def loadNormalizedData():
-
-    vecSize = 4
-    nameToDigit = {'Iris-virginica': 1, 'Iris-setosa': 2, 'Iris-versicolor': 3}
+def loadNormalizedData(vecSize, nameToDigit):
     x = []
     y = []
     lines = [line.rstrip('\n') for line in open('../data/iris.data')]
@@ -40,16 +45,17 @@ def loadNormalizedData():
     for line in lines:
         terms = line.split(',')
         if(len(terms) > 1):
-            x.append([float(terms[0]), float(terms[1]), float(terms[2]), float(terms[3])])
+            vector = [float(terms[i]) for i in xrange(vecSize)]
+            x.append(vector)
 
-            for i in range(vecSize):
+            for i in xrange(vecSize):
                 xMin[i] = min(x[-1][i], xMin[i])
                 xMax[i] = max(x[-1][i], xMax[i])
 
-            y.append(nameToDigit[terms[4]])
+            y.append(nameToDigit[terms[-1]])
 
     for vector in x:
-        for i in range(vecSize):
+        for i in xrange(vecSize):
             vector[i] = (vector[i] - xMin[i]) / (xMax[i] - xMin[i])
 
     return x, y

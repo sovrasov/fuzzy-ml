@@ -1,44 +1,57 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+Copyright (C) 2016 Sovrasov - All Rights Reserved
+ * You may use, distribute and modify this code under the
+ * terms of the MIT license.
+ * You should have received a copy of the MIT license with
+ * this file. If not visit https://opensource.org/licenses/MIT
+'''
 
 from miscFunctions import *
 import numpy as np
 import copy
 
 def randomVectorConstrained(lBound, uBound):
-    return np.array([random.uniform(lBound[i], uBound[i]) for i in range(len(lBound))])
+    return np.array([random.uniform(lBound[i], uBound[i]) for i in xrange(len(lBound))])
 
-def checkBounds(vector, bounds)
-    if np.where(vector < bounds[0])[0].size != 0 and np.where(vector > bounds[1])[0].size != 0:
+def checkBounds(vector, bounds):
+    if np.where(vector < bounds[0])[0].size != 0 or np.where(vector > bounds[1])[0].size != 0:
         return False
     return True
 
-def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 30):
+def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100):
     spaceDimension = len(firstPoint)
-    swarm = [randomVectorConstrained(bounds[0], bounds[1]) for _ in range(numberOfParticles)]
-    swarm.append(firstPoint)
+    swarm = [randomVectorConstrained(bounds[0], bounds[1]) \
+        for _ in xrange(numberOfParticles - 1)]
+    swarm.append(np.array(firstPoint))
     swarmBest = copy.deepcopy(swarm)
     bestValues = [objectiveFunction(x) for x in swarmBest]
     bestParam = copy.copy(firstPoint)
     bestGlobalValue = objectiveFunction(bestParam)
-    velocities = np.array([[0.0] * spaceDimension] * (numberOfParticles + 1))
+    velocities = np.array([[0.0] * spaceDimension] * (numberOfParticles))
     maxIterations = 20
     iters = 0
-    eps = 10e-4
-    w = 0.3
-    c1 = 0.2
-    c2 = 0.5
+    eps = 10e-3
+    w = 0.4
+    c1 = 0.3
+    c2 = 0.7
 
     print('-'*50)
-    print('Initial best falue:\t{}'.format(bestGlobalValue))
+    print('Initial best value:\t{}'.format(bestGlobalValue))
 
-    while iters < maxIterations:
-        for i in range(numberOfParticles):
+    while iters < maxIterations and bestGlobalValue > eps:
+        for i in xrange(numberOfParticles):
             velocities[i] = w*velocities[i] + c1*random.uniform(0,1)* \
-                    (swarmBest[i] - swarm[i]) + c2*random.uniform(0,1)*(bestParam-swarm[i])
+                    (swarmBest[i] - swarm[i]) + c2*random.uniform(0,1)*(bestParam - swarm[i])
+            if not checkBounds(swarm[i] + velocities[i], bounds):
+                while True:
+                    velocities[i] /= 2
+                    if checkBounds(swarm[i] + velocities[i], bounds):
+                        break
             swarm[i] += velocities[i]
-            #if not checkBounds(swarm[i], bounds)
-            #    print('stepped out')
-        for i in range(numberOfParticles):
+
+        for i in xrange(numberOfParticles):
             currentValue = objectiveFunction(swarm[i])
             if(currentValue < bestGlobalValue):
                 bestGlobalValue = currentValue
@@ -47,7 +60,7 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 30):
                 bestValues[i] = currentValue
                 swarmBest[i] = copy.copy(swarm[i])
 
-        print('New best falue: \t{}'.format(bestGlobalValue))
+        print('New best value: \t{}'.format(bestGlobalValue))
         iters += 1
 
     print('-'*50)
