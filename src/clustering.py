@@ -3,7 +3,7 @@
 from miscFunctions import *
 import numpy as np
 
-def getKohonenClusters(vectors, numberOfClusters = 10):
+def getKohonenClusters(vectors, numberOfClusters = 15):
     vecSize = len(vectors[0])
     eps = 10e-4
     maxIters = 10
@@ -20,7 +20,6 @@ def getKohonenClusters(vectors, numberOfClusters = 10):
         totalWins = np.sum(winsCounters)
         for vector in vectors:
             distances = [winsCounters[i] * dist(clusterCenters[i], vector) / totalWins for i in range(numberOfClusters)]
-            #print(distances)
             w = np.argmin(distances)
             distances[w] = float('inf')
             r = np.argmin(distances)
@@ -33,19 +32,16 @@ def getKohonenClusters(vectors, numberOfClusters = 10):
         clustersDist = 0.0
         for i in range(numberOfClusters):
             clustersDist += dist(clusterCenters[i], oldClustersCenters[i])
-#            print(clusterCenters[i])
-#            print(oldClustersCenters[i])
         clustersDist /= numberOfClusters
         oldClustersCenters = np.copy(clusterCenters)
 
         alphaW -= alphaW * iters / maxIters
         alphaR -= alphaR * iters / maxIters
         iters += 1
-#        print('cluster dist {}'.format(clustersDist))
+
     filteredClusters = []
     for cluster in clusterCenters:
         if np.where(cluster < 0.0)[0].size == 0 and np.where(cluster > 1.0)[0].size == 0:
             filteredClusters.append(cluster)
 
-    #print('Iterations: {}'.format(iters))
     return filteredClusters

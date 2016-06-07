@@ -11,7 +11,6 @@ class TSK0():
         self.b = []
         self.numberOfRules = 0
         self.inputDimension = 0
-        self.numberOfClasses = 0
 
     def __evaluateConfidence(self, ruleID, x):
         expValues = [np.exp(-0.5*((x[i] - self.centers[ruleID][i]) / self.vars[ruleID])**2)
@@ -27,7 +26,7 @@ class TSK0():
             uBound.extend([1.0]*self.inputDimension)
 
         lBound.extend([0.0] * (2 * self.numberOfRules))
-        uBound.extend([float('inf')] * (2 * self.numberOfRules))
+        uBound.extend([5.0] * (2 * self.numberOfRules))
 
         return lBound, uBound
 
@@ -45,14 +44,13 @@ class TSK0():
         self.vars = parameters[self.numberOfRules*self.inputDimension : self.numberOfRules*self.inputDimension + self.numberOfRules]
         self.b = parameters[self.numberOfRules*(self.inputDimension + 1 ) :]
 
-    def initFromClusters(self, clusterCenters, x, y, numberOfClasses):
+    def initFromClusters(self, clusterCenters, x, y):
         self.centers = clusterCenters
         self.numberOfRules = len(clusterCenters)
         self.inputDimension = len(x[0])
-        self.numberOfClasses = numberOfClasses
 
         for i in range(self.numberOfRules):
-            distances = []#[dist(self.centers[i], center) for center in self.centers]
+            distances = []
             for j in range(self.numberOfRules):
                 if j != i:
                     distances.append(dist(self.centers[i], self.centers[j]))
@@ -66,13 +64,10 @@ class TSK0():
             multiplicatedConfidences = np.multiply(confidences, y)
             self.b.append(np.sum(multiplicatedConfidences) / np.sum(confidences))
 
-        #print(self.b)
-
     def predict(self, x):
         firstLayersOutput = [self.__evaluateConfidence(i, x) for i in range(self.numberOfRules)]
         sum2 = np.sum(firstLayersOutput)
         sum1 = np.sum(np.multiply(firstLayersOutput, self.b))
-        #print(sum1 / sum2 - 0.5)
         return np.ceil(sum1 / sum2 - 0.5)
 
     def score(self, x, y):

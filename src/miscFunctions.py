@@ -3,6 +3,13 @@
 import random
 import numpy
 
+def getTSK0Score(model, params, xTest, yTest):
+    model.decode(params)
+    error = 0.0
+    for i in range(len(xTest)):
+        error += (yTest[i] - model.predict(xTest[i]))**2
+    return error / len(xTest)
+
 def splitDataset(x, y, testRatio = 0.2):
     data = zip(x, y)
     trainSize = int((1.0 - testRatio)*len(y))
