@@ -34,10 +34,10 @@ def dist(x, y, squared = True):
         return np.sum((x - y)**2)
     return np.sqrt(numpy.sum((x - y)**2))
 
-def loadNormalizedData(vecSize, nameToDigit):
+def loadNormalizedData(path, vecSize, nameToDigit):
     x = []
     y = []
-    lines = [line.rstrip('\n') for line in open('../data/iris.data')]
+    lines = [line.rstrip('\n') for line in open(path)]
 
     xMin = [float("inf")] * vecSize
     xMax = [float("-inf")] * vecSize

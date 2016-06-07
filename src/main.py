@@ -27,10 +27,13 @@ def main():
             type=int, default=100)
     parser.add_argument('-ts', '--testSize', type=float, default=0.3, \
             help = 'Relative size of test dataset')
+    parser.add_argument('-dp', '--dataPath', type=buffer, default='../data/iris.data', \
+            help = 'Path to file with the iris dataset')
     args = parser.parse_args()
 
+    random.seed(args.seed)
     nameToDigit = {'Iris-virginica': 1, 'Iris-setosa': 2, 'Iris-versicolor': 3}
-    dataSet = loadNormalizedData(4, nameToDigit)
+    dataSet = loadNormalizedData(args.dataPath, 4, nameToDigit)
     print('Dataset loaded')
     xTrain, yTrain, xTest, yTest = splitDataset(dataSet[0], dataSet[1], args.testSize)
     clusterCenters = getKohonenClusters(dataSet[0], args.nClusters)
