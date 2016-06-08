@@ -11,6 +11,10 @@ Copyright (C) 2016 Sovrasov V. - All Rights Reserved
 import random
 import numpy as np
 
+def printIf(ountput, needPrint = True):
+    if needPrint:
+        print(ountput)
+
 def getTSK0Score(model, params, xTest, yTest):
     model.decode(params)
     error = 0.0

@@ -20,7 +20,7 @@ def checkBounds(vector, bounds):
         return False
     return True
 
-def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100):
+def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100, verbose = True):
     spaceDimension = len(firstPoint)
     swarm = [randomVectorConstrained(bounds[0], bounds[1]) \
         for _ in xrange(numberOfParticles - 1)]
@@ -37,8 +37,8 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100):
     c1 = 0.3
     c2 = 0.7
 
-    print('-'*50)
-    print('Initial best value:\t{}'.format(bestGlobalValue))
+    printIf('-'*50, verbose)
+    printIf('Initial best value:\t{}'.format(bestGlobalValue), verbose)
 
     while iters < maxIterations and bestGlobalValue > eps:
         for i in xrange(numberOfParticles):
@@ -60,8 +60,8 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100):
                 bestValues[i] = currentValue
                 swarmBest[i] = copy.copy(swarm[i])
 
-        print('New best value: \t{}'.format(bestGlobalValue))
+        printIf('New best value: \t{}'.format(bestGlobalValue), verbose)
         iters += 1
 
-    print('-'*50)
+    printIf('-'*50, verbose)
     return bestParam
