@@ -21,17 +21,17 @@ def main():
     parser = argparse.ArgumentParser(description='Building and optimization of \
             TSK0 model for sovling irises classification problem')
     parser.add_argument('-nc', '--nClusters', help='Number of clusters in Kohonen network', \
-            type=int, default=20)
+            type=int, default=10)
     parser.add_argument('-np', '--nParticles', help='Number of particles in PSO', \
-            type=int, default=30)
+            type=int, default=20)
     parser.add_argument('-s', '--seed', help='Seed for RNG', \
-            type=int, default=100)
-    parser.add_argument('-ts', '--testSize', type=float, default=0.3, \
+            type=int, default=1)
+    parser.add_argument('-ts', '--testSize', type=float, default=0.2, \
             help = 'Relative size of test dataset')
     parser.add_argument('-dp', '--dataPath', type=str, default='../data/iris.data', \
             help = 'Path to file with the iris dataset')
     parser.add_argument('-vm', '--validationMethod', type=str, default='oneshot', \
-            help = 'Validation method: oneshot or kfold', choices=[str('oneshot'), str('kfold')])
+            help = 'Validation method: oneshot or kfold', choices=[str('oneshot'), str('crossv')])
     parser.add_argument('-k', '--foldsNumber', type=int, default=4, \
             help = 'Number of folds in cross-validation')
     args = parser.parse_args()
@@ -42,7 +42,6 @@ def main():
 
     if (args.validationMethod == str('oneshot')):
         random.seed(args.seed)
-        randomInstance = random.Random(args.seed)
         xTrain, yTrain, xTest, yTest = splitDataset(dataSet[0], dataSet[1], \
             args.testSize, args.seed)
         clusterCenters = getKohonenClusters(xTrain, args.nClusters, args.seed)
@@ -61,8 +60,8 @@ def main():
         printIf('Testing model...')
         printIf('Train score: {}'.format(model.score(xTrain, yTrain)))
         printIf('Test score: {}'.format(model.score(xTest, yTest)))
-    elif(args.validationMethod == str('kfold')):
-        printIf('Start working ...')
+    elif(args.validationMethod == str('crossv')):
+        printIf('Start cross-validation...')
         printIf('Cross-validation score: {}'.format(getTSK0KFoldCVScore( \
             lambda xTrain, yTrain, xTest, yTest, conn: buildAndTestModel( \
             args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1],\

@@ -20,7 +20,8 @@ def getKohonenClusters(vectors, numberOfClusters = 15, seed = 0):
     alphaR = 0.05
     alphaW = 0.6
 
-    clusterCenters = [np.array(random_floats(0., 1., vecSize, randomInstance)) for _ in xrange(numberOfClusters)]
+    clusterCenters = [np.array(random_floats(0., 1., vecSize, randomInstance)) \
+        for _ in xrange(numberOfClusters)]
     oldClustersCenters = np.copy(clusterCenters)
     clustersDist = float('inf')
     iters = 0
