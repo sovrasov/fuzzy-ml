@@ -17,14 +17,13 @@ from tsk0Model import TSK0
 from pso import PSO
 
 class ThreadWorker (threading.Thread):
-    def __init__(self, job):
+    def __init__(self, job, ID):
         threading.Thread.__init__(self)
         self.job = job
-        self.result = 0
+        self.result = 0.0
+        self.ID = ID
     def run(self):
         self.result = self.job()
-        print('#'*60)
-        print('Evaluated score {}'.format(self.result))
 
 def buildAndTestModel(args, xTrain, yTrain, xTest, yTest):
     random.seed(args.seed)
@@ -40,11 +39,10 @@ def buildAndTestModel(args, xTrain, yTrain, xTest, yTest):
 
 def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5):
     data = zip(x, y)
-    random.seed(10)
     random.shuffle(data)
     slices = [data[i::k] for i in xrange(k)]
 
-    scores = []
+    score = 0.0
     threads = []
 
     for i in xrange(k):
@@ -54,12 +52,13 @@ def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5):
                     for item in s]
         xTrain, yTrain = zip(*training)
         xTest, yTest = zip(*validation)
-        thread = ThreadWorker(lambda: modelEvaluator(xTrain, yTrain, xTest, yTest))
+        thread = ThreadWorker(lambda: modelEvaluator(xTrain, yTrain, xTest, yTest), i + 1)
         thread.start()
         threads.append(thread)
 
     for thread in threads:
         thread.join()
-        scores.append(thread.result)
+        score += thread.result
+        printIf('Quality on split {}: \t{}'.format(thread.ID, thread.result))
 
-    return np.sum(np.array(scores)) / k
+    return score / k

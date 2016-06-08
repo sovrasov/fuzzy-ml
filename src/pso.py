@@ -42,8 +42,8 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100, verbose 
 
     while iters < maxIterations and bestGlobalValue > eps:
         for i in xrange(numberOfParticles):
-            velocities[i] = w*velocities[i] + c1*random.uniform(0,1)* \
-                    (swarmBest[i] - swarm[i]) + c2*random.uniform(0,1)*(bestParam - swarm[i])
+            velocities[i] = w*velocities[i] + c1*random.uniform(0.0,1.0)* \
+                    (swarmBest[i] - swarm[i]) + c2*random.uniform(0.0,1.0)*(bestParam - swarm[i])
             if not checkBounds(swarm[i] + velocities[i], bounds):
                 while True:
                     velocities[i] /= 2
