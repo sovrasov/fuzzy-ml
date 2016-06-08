@@ -17,12 +17,12 @@ from tsk0Model import TSK0
 from pso import PSO
 
 def buildAndTestModel(args, xTrain, yTrain, xTest, yTest, conn):
-    clusterCenters = getKohonenClusters(xTrain, args.nClusters)
+    clusterCenters = getKohonenClusters(xTrain, args.nClusters, args.seed)
     model = TSK0()
     model.initFromClusters(clusterCenters, xTrain, yTrain)
     initialParams = model.code()
     newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
-        model.code(), model.getParametersBounds(), args.nParticles, False)
+        model.code(), model.getParametersBounds(), args.nParticles, False, args.seed)
     model.decode(newParams)
     conn.send(model.score(xTest, yTest))
 
@@ -39,7 +39,7 @@ def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5, seed = 0):
         xTrain, yTrain = zip(*training)
         xTest, yTest = zip(*validation)
         parent_conn, child_conn = mp.Pipe()
-        thread = mp.Process(target=modelEvaluator, args= \
+        thread = mp.Process(target=modelEvaluator, args=\
             (xTrain, yTrain, xTest, yTest, child_conn))
         thread.start()
         threads.append([thread, parent_conn])

@@ -65,7 +65,8 @@ def main():
         printIf('Start working ...')
         printIf('Cross-validation score: {}'.format(getTSK0KFoldCVScore( \
             lambda xTrain, yTrain, xTest, yTest, conn: buildAndTestModel( \
-            args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1], args.foldsNumber)))
+            args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1],\
+            args.foldsNumber)))
 
 if __name__ == '__main__':
     main()
