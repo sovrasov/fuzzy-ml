@@ -8,7 +8,7 @@ Copyright (C) 2016 Sovrasov V. - All Rights Reserved
  * this file. If not visit https://opensource.org/licenses/MIT
 '''
 
-import threading
+import multiprocessing as mp
 import numpy as np
 
 from miscFunctions import *
@@ -16,17 +16,7 @@ from clustering import getKohonenClusters
 from tsk0Model import TSK0
 from pso import PSO
 
-class ThreadWorker (threading.Thread):
-    def __init__(self, job, ID):
-        threading.Thread.__init__(self)
-        self.job = job
-        self.result = 0.0
-        self.ID = ID
-    def run(self):
-        self.result = self.job()
-
-def buildAndTestModel(args, xTrain, yTrain, xTest, yTest):
-    random.seed(args.seed)
+def buildAndTestModel(args, xTrain, yTrain, xTest, yTest, conn):
     clusterCenters = getKohonenClusters(xTrain, args.nClusters)
     model = TSK0()
     model.initFromClusters(clusterCenters, xTrain, yTrain)
@@ -34,31 +24,30 @@ def buildAndTestModel(args, xTrain, yTrain, xTest, yTest):
     newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
         model.code(), model.getParametersBounds(), args.nParticles, False)
     model.decode(newParams)
+    conn.send(model.score(xTest, yTest))
 
-    return model.score(xTest, yTest)
-
-def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5):
+def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5, seed = 0):
+    rndInstance = random.Random(seed)
     data = zip(x, y)
-    random.shuffle(data)
-    slices = [data[i::k] for i in xrange(k)]
-
+    rndInstance.shuffle(data)
     score = 0.0
     threads = []
 
     for i in xrange(k):
-        validation = slices[i]
-        training = [item
-                    for s in slices if s is not validation
-                    for item in s]
+        training = [x for j, x in enumerate(data) if j % k != i]
+        validation = [x for j, x in enumerate(data) if j % k == i]
         xTrain, yTrain = zip(*training)
         xTest, yTest = zip(*validation)
-        thread = ThreadWorker(lambda: modelEvaluator(xTrain, yTrain, xTest, yTest), i + 1)
+        parent_conn, child_conn = mp.Pipe()
+        thread = mp.Process(target=modelEvaluator, args= \
+            (xTrain, yTrain, xTest, yTest, child_conn))
         thread.start()
-        threads.append(thread)
+        threads.append([thread, parent_conn])
 
-    for thread in threads:
-        thread.join()
-        score += thread.result
-        printIf('Quality on split {}: \t{}'.format(thread.ID, thread.result))
+    for i in xrange(len(threads)):
+        currentScore = threads[i][1].recv()
+        threads[i][0].join()
+        score += currentScore
+        printIf('Quality on split {}: \t{}'.format(i + 1, currentScore))
 
     return score / k

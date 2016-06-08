@@ -12,17 +12,18 @@ from miscFunctions import *
 import numpy as np
 import copy
 
-def randomVectorConstrained(lBound, uBound):
-    return np.array([random.uniform(lBound[i], uBound[i]) for i in xrange(len(lBound))])
+def randomVectorConstrained(lBound, uBound, rndInstance):
+    return np.array([rndInstance.uniform(lBound[i], uBound[i]) for i in xrange(len(lBound))])
 
 def checkBounds(vector, bounds):
     if np.where(vector < bounds[0])[0].size != 0 or np.where(vector > bounds[1])[0].size != 0:
         return False
     return True
 
-def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100, verbose = True):
+def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100, verbose = True, seed = 0):
+    rndInstance = random.Random(seed)
     spaceDimension = len(firstPoint)
-    swarm = [randomVectorConstrained(bounds[0], bounds[1]) \
+    swarm = [randomVectorConstrained(bounds[0], bounds[1], rndInstance) \
         for _ in xrange(numberOfParticles - 1)]
     swarm.append(np.array(firstPoint))
     swarmBest = copy.deepcopy(swarm)
@@ -42,8 +43,9 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100, verbose 
 
     while iters < maxIterations and bestGlobalValue > eps:
         for i in xrange(numberOfParticles):
-            velocities[i] = w*velocities[i] + c1*random.uniform(0.0,1.0)* \
-                    (swarmBest[i] - swarm[i]) + c2*random.uniform(0.0,1.0)*(bestParam - swarm[i])
+            velocities[i] = w*velocities[i] + c1*rndInstance.uniform(0.0,1.0)* \
+                    (swarmBest[i] - swarm[i]) + \
+                    c2*rndInstance.uniform(0.0,1.0)*(bestParam - swarm[i])
             if not checkBounds(swarm[i] + velocities[i], bounds):
                 while True:
                     velocities[i] /= 2

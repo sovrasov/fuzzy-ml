@@ -32,18 +32,20 @@ def main():
             help = 'Path to file with the iris dataset')
     parser.add_argument('-vm', '--validationMethod', type=str, default='oneshot', \
             help = 'Validation method: oneshot or kfold', choices=[str('oneshot'), str('kfold')])
-    parser.add_argument('-k', '--foldsNumber', type=int, default=3, \
+    parser.add_argument('-k', '--foldsNumber', type=int, default=4, \
             help = 'Number of folds in cross-validation')
     args = parser.parse_args()
 
-    random.seed(args.seed)
     nameToDigit = {'Iris-virginica': 1, 'Iris-setosa': 2, 'Iris-versicolor': 3}
     dataSet = loadNormalizedData(args.dataPath, 4, nameToDigit)
     printIf('Dataset loaded')
 
     if (args.validationMethod == str('oneshot')):
-        xTrain, yTrain, xTest, yTest = splitDataset(dataSet[0], dataSet[1], args.testSize)
-        clusterCenters = getKohonenClusters(xTrain, args.nClusters)
+        random.seed(args.seed)
+        randomInstance = random.Random(args.seed)
+        xTrain, yTrain, xTest, yTest = splitDataset(dataSet[0], dataSet[1], \
+            args.testSize, args.seed)
+        clusterCenters = getKohonenClusters(xTrain, args.nClusters, args.seed)
         printIf('Clusters found: {}'.format(len(clusterCenters)))
         printIf('Building model...')
         model = TSK0()
@@ -54,7 +56,7 @@ def main():
         printIf('Optimizing model...')
         initialParams = model.code()
         newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
-            model.code(), model.getParametersBounds(), args.nParticles)
+            model.code(), model.getParametersBounds(), args.nParticles, args.seed)
         model.decode(newParams)
         printIf('Testing model...')
         printIf('Train score: {}'.format(model.score(xTrain, yTrain)))
@@ -62,8 +64,8 @@ def main():
     elif(args.validationMethod == str('kfold')):
         printIf('Start working ...')
         printIf('Cross-validation score: {}'.format(getTSK0KFoldCVScore( \
-            lambda xTrain, yTrain, xTest, yTest: buildAndTestModel( \
-            args, xTrain, yTrain, xTest, yTest), dataSet[0], dataSet[1], args.foldsNumber)))
+            lambda xTrain, yTrain, xTest, yTest, conn: buildAndTestModel( \
+            args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1], args.foldsNumber)))
 
 if __name__ == '__main__':
     main()
