@@ -26,7 +26,7 @@ def buildAndTestModel(args, xTrain, yTrain, xTest, yTest, conn):
     model.decode(newParams)
     conn.send(model.score(xTest, yTest))
 
-def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5, seed = 0):
+def getTSK0KFoldCVScore(modelEvaluator, x, y, k = 5, seed = 0):
     rndInstance = random.Random(seed)
     data = zip(x, y)
     rndInstance.shuffle(data)
@@ -38,16 +38,16 @@ def getTSK0KFoldCVScore(modelEvaluator, x, y, k=5, seed = 0):
         validation = [x for j, x in enumerate(data) if j % k == i]
         xTrain, yTrain = zip(*training)
         xTest, yTest = zip(*validation)
-        parent_conn, child_conn = mp.Pipe()
+        parentPipe, childPipe = mp.Pipe()
         thread = mp.Process(target=modelEvaluator, args=\
-            (xTrain, yTrain, xTest, yTest, child_conn))
+            (xTrain, yTrain, xTest, yTest, childPipe))
         thread.start()
-        threads.append([thread, parent_conn])
+        threads.append([thread, parentPipe])
 
     for i in xrange(len(threads)):
         currentScore = threads[i][1].recv()
         threads[i][0].join()
         score += currentScore
-        printIf('Quality on split {}: \t{}'.format(i + 1, currentScore))
+        printIf('Score on split {}: \t{}'.format(i + 1, currentScore))
 
     return score / k
