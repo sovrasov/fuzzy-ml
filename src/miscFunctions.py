@@ -11,6 +11,10 @@ Copyright (C) 2016 Sovrasov V. - All Rights Reserved
 import random
 import numpy as np
 
+def printIf(ountput, needPrint = True):
+    if needPrint:
+        print(ountput)
+
 def getTSK0Score(model, params, xTest, yTest):
     model.decode(params)
     error = 0.0
@@ -18,16 +22,17 @@ def getTSK0Score(model, params, xTest, yTest):
         error += (yTest[i] - model.predictRaw(xTest[i]))**2
     return error / len(xTest)
 
-def splitDataset(x, y, testRatio = 0.2):
+def splitDataset(x, y, testRatio = 0.2, seed = 0):
+    randomInstance = random.Random(seed)
     data = zip(x, y)
     trainSize = int((1.0 - testRatio)*len(y))
-    random.shuffle(data)
+    randomInstance.shuffle(data)
     xTrain, yTrain = zip(*data[:trainSize])
     xTest, yTest = zip(*data[trainSize:])
     return xTrain, yTrain, xTest, yTest
 
-def random_floats(low, high, size):
-    return [random.uniform(low, high) for _ in xrange(size)]
+def random_floats(low, high, size, randomInstance):
+    return [randomInstance.uniform(low, high) for _ in xrange(size)]
 
 def dist(x, y, squared = True):
     if squared:
