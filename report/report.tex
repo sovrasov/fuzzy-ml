@@ -60,6 +60,8 @@
   autolang=other]{biblatex}
 \addbibresource{refs.bib}
 
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 
 % Sections style redefinition
 \renewcommand{\thesection}
@@ -95,6 +97,9 @@
 \SetAlgorithmName{Алгоритм}{алгоритм}{Список алгоритмов}
 
 \usetikzlibrary{trees}
+\DeclareMathOperator{\logicIf}{if}
+\DeclareMathOperator{\is}{is}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \begin{document}
 \input{report_titlepage}
