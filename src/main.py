@@ -27,11 +27,11 @@ def main():
     parser.add_argument('-s', '--seed', help='Seed for RNG', \
             type=int, default=1)
     parser.add_argument('-ts', '--testSize', type=float, default=0.2, \
-            help = 'Relative size of test dataset')
+            help = 'Relative size of test data set')
     parser.add_argument('-dp', '--dataPath', type=str, default='../data/iris.data', \
             help = 'Path to file with the iris dataset')
     parser.add_argument('-vm', '--validationMethod', type=str, default='oneshot', \
-            help = 'Validation method: oneshot or kfold', choices=[str('oneshot'), str('crossv')])
+            help = 'Validation method', choices=[str('oneshot'), str('crossv')])
     parser.add_argument('-k', '--foldsNumber', type=int, default=4, \
             help = 'Number of folds in cross-validation')
     args = parser.parse_args()
