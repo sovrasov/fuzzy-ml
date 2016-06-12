@@ -62,10 +62,11 @@ def main():
         printIf('Test score: {}'.format(model.score(xTest, yTest)))
     elif(args.validationMethod == str('crossv')):
         printIf('Start cross-validation...')
-        printIf('Cross-validation score: {}'.format(getTSK0KFoldCVScore( \
+        score, stdDev = getTSK0KFoldCVScore( \
             lambda xTrain, yTrain, xTest, yTest, conn: buildAndTestModel( \
             args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1],\
-            args.foldsNumber)))
+            args.foldsNumber)
+        printIf('Cross-validation score: {}, standard deviation: {}'.format(score, stdDev))
 
 if __name__ == '__main__':
     main()

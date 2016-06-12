@@ -22,7 +22,7 @@ def buildAndTestModel(args, xTrain, yTrain, xTest, yTest, conn):
     model.initFromClusters(clusterCenters, xTrain, yTrain)
     initialParams = model.code()
     newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
-        model.code(), model.getParametersBounds(), args.nParticles, False, args.seed)
+    model.code(), model.getParametersBounds(), args.nParticles, False, args.seed)
     model.decode(newParams)
     conn.send(model.score(xTest, yTest))
 
@@ -30,7 +30,7 @@ def getTSK0KFoldCVScore(modelEvaluator, x, y, k = 5, seed = 0):
     rndInstance = random.Random(seed)
     data = zip(x, y)
     rndInstance.shuffle(data)
-    score = 0.0
+    scores = []
     threads = []
 
     for i in xrange(k):
@@ -47,7 +47,7 @@ def getTSK0KFoldCVScore(modelEvaluator, x, y, k = 5, seed = 0):
     for i in xrange(len(threads)):
         currentScore = threads[i][1].recv()
         threads[i][0].join()
-        score += currentScore
-        printIf('Score on split {}: \t{}'.format(i + 1, currentScore))
+        scores.append(currentScore)
+        printIf('Score on split {}: \t{}'.format(i + 1, scores[-1]))
 
-    return score / k
+    return np.sum(scores) / k, np.std(scores)
