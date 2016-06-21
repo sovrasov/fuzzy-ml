@@ -65,7 +65,7 @@ def main():
         score, stdDev = getTSK0KFoldCVScore( \
             lambda xTrain, yTrain, xTest, yTest, conn: buildAndTestModel( \
             args, xTrain, yTrain, xTest, yTest, conn), dataSet[0], dataSet[1],\
-            args.foldsNumber)
+            args.foldsNumber, args.seed)
         printIf('Cross-validation score: {}, standard deviation: {}'.format(score, stdDev))
 
 if __name__ == '__main__':
