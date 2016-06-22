@@ -14,11 +14,11 @@ import numpy as np
 def getKohonenClusters(vectors, numberOfClusters = 15, seed = 0):
     randomInstance = random.Random(seed)
     vecSize = len(vectors[0])
-    eps = 10e-4
-    maxIters = 10
+    eps = 10e-5
+    maxIters = 20
     winsCounters = [1] * numberOfClusters
-    alphaR = 0.05
-    alphaW = 0.6
+    alphaR = 0.01
+    alphaW = 0.7
 
     clusterCenters = [np.array(random_floats(0., 1., vecSize, randomInstance)) \
         for _ in xrange(numberOfClusters)]

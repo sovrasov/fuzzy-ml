@@ -27,6 +27,8 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
     spaceDimension = len(firstPoint)
     swarm = [randomVectorConstrained(bounds[0], bounds[1], rndInstance) \
         for _ in xrange(numberOfParticles - 1)]
+    if not checkBounds(firstPoint, bounds):
+        firstPoint = randomVectorConstrained(bounds[0], bounds[1], rndInstance)
     swarm.append(np.array(firstPoint))
     swarmBest = copy.deepcopy(swarm)
     bestValues = [objectiveFunction(x) for x in swarmBest]

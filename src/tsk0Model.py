@@ -10,6 +10,7 @@ Copyright (C) 2016 Sovrasov V. - All Rights Reserved
 
 import numpy as np
 from miscFunctions import *
+import copy
 
 class TSK0():
 
@@ -92,37 +93,62 @@ class TSK0():
         answers = [self.predict(vector) for vector in x]
         return np.where(np.array(answers) == np.array(y))[0].size / float(len(y))
 
-    def fitWithGradient(self, x, y):
+    def __getGradientOffset(self, x, y):
         delta = 10e-15
-        maxIters = 200
-        freq = 8
-        eta = 0.001
-        eps = 10e-8
-        bestValue = self.error(x, y)
+        deltaC = np.array([[0.0]*len(x[0])]*self.numberOfRules)
+        deltaB = np.array([0.0]*self.numberOfRules)
+        deltaA = np.array([[0.0]*len(x[0])]*self.numberOfRules)
+        for t in xrange(len(x)):
+            secondLayerOutput = [self.__evaluateTermsConfidences(i, x[t]) \
+                    for i in xrange(self.numberOfRules)]
+            thirdLayerOutput = [np.prod(ruleConf) for ruleConf  in secondLayerOutput]
+            sum2 = np.sum(thirdLayerOutput)
+            sum1 = np.sum(np.multiply(thirdLayerOutput, self.b))
+            prediction = sum1 / sum2
+            delta41 = 2. * (prediction - y[t]) / sum2
+            delta42 = - 2. * (prediction - y[t]) * sum1 / (sum2**2 + delta)
+            delta3 = [self.b[i] * delta41 + delta42 for i in xrange(self.numberOfRules)]
+            delta2 = [[delta3[i]*thirdLayerOutput[i] / \
+                (secondLayerOutput[i][j] + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
+            deltaB1 = [delta41*self.b[i]*thirdLayerOutput[i] for i in xrange(self.numberOfRules)]
+            deltaC1 = [[delta2[i][j]*secondLayerOutput[i][j]* \
+                (x[t][j] - self.centers[i][j]) / (self.vars[i][j]**2 + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
+            deltaA1 = [[delta2[i][j]*secondLayerOutput[i][j]* \
+                (x[t][j] - self.centers[i][j]) ** 2 / (self.vars[i][j]**3 + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
+
+            deltaB += deltaB1
+            for i in xrange(self.numberOfRules):
+                deltaC[i] += deltaC1[i]
+                deltaA[i] += deltaA1[i]
+
+        return deltaA, deltaB, deltaC
+
+    def fitWithGradient(self, x, y):
+        maxIters = 150
+        eps = 10e-6
+        bestScore = self.error(x, y)
+        lastBestScore = bestScore*2
+        currentScore = bestScore*2
         for iter in xrange(maxIters):
-            for t in xrange(len(x)):
-                secondLayerOutput = [self.__evaluateTermsConfidences(i, x[t]) for i in xrange(self.numberOfRules)]
-                thirdLayerOutput = [np.prod(ruleConf) for ruleConf  in secondLayerOutput]
-                sum2 = np.sum(thirdLayerOutput)
-                sum1 = np.sum(np.multiply(thirdLayerOutput, self.b))
-                prediction = sum1 / sum2
-                delta41 = 2. * (prediction - y[t]) / sum2
-                delta42 = - 2. * (prediction - y[t]) * sum1 / (sum2**2 + delta)
-                delta3 = [self.b[i] * delta41 + delta42 for i in xrange(self.numberOfRules)]
-                delta2 = [[delta3[i]*thirdLayerOutput[i] / (secondLayerOutput[i][j] + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
-                deltaB = [delta41*self.b[i]*thirdLayerOutput[i] for i in xrange(self.numberOfRules)]
-                deltaC = [[delta2[i][j]*secondLayerOutput[i][j]* \
-                    (x[t][j] - self.centers[i][j]) / (self.vars[i][j]**2 + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
-                deltaA = [[delta2[i][j]*secondLayerOutput[i][j]* \
-                    (x[t][j] - self.centers[i][j]) ** 2 / (self.vars[i][j]**3 + delta) for j in xrange(self.inputDimension)] for i in xrange(self.numberOfRules)]
-                self.b -= eta*np.array(deltaB)
+            eta = (1.0 - float(iter) / maxIters)*0.001
+            deltaA, deltaB, deltaC = self.__getGradientOffset(x, y)
+            self.b -= eta*deltaB
+            for i in xrange(self.numberOfRules):
+                self.centers[i] -= eta*deltaC[i]
+                self.vars[i] -= eta*deltaA[i]
+            currentScore = self.error(x,y)
+
+            divisionsCounter = 0
+            while currentScore > bestScore and divisionsCounter < 10:
+                eta /= 2.0
+                divisionsCounter += 1
+                self.b += eta*np.array(deltaB)
                 for i in xrange(self.numberOfRules):
-                    self.centers[i] -= eta*np.array(deltaC[i])
-                    self.vars[i] -= eta*np.array(deltaA[i])
-                eta = (1.0 - float(iter) / maxIters)*0.001
-            if iter % freq == freq - 1:
-                currentValue = self.error(x, y)
-                if (np.abs(currentValue - bestValue) < eps ) or currentValue > bestValue:
-                    break
-                elif currentValue < bestValue:
-                    bestValue = currentValue
+                    self.centers[i] += eta*np.array(deltaC[i])
+                    self.vars[i] += eta*np.array(deltaA[i])
+                currentScore = self.error(x,y)
+            if bestScore > currentScore:
+                lastBestScore = bestScore
+                bestScore = currentScore
+            if np.abs(lastBestScore - bestScore) < eps or currentScore > bestScore:
+                break
