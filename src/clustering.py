@@ -50,7 +50,7 @@ def getKohonenClusters(vectors, numberOfClusters = 15, seed = 0):
 
     filteredClusters = []
     for cluster in clusterCenters:
-        if np.where(cluster < 0.0)[0].size == 0 and np.where(cluster > 1.0)[0].size == 0:
+        if np.all(cluster >= 0.0) and np.all(cluster <= 1.0):
             filteredClusters.append(cluster)
 
     return filteredClusters

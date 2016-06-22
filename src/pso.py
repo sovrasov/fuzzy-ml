@@ -17,9 +17,9 @@ def randomVectorConstrained(lBound, uBound, rndInstance):
         for i in xrange(len(lBound))])
 
 def checkBounds(vector, bounds):
-    if np.where(vector < bounds[0])[0].size != 0 or np.where(vector > bounds[1])[0].size != 0:
-        return False
-    return True
+    if np.all(vector > bounds[0]) and np.all(vector < bounds[1]):
+        return True
+    return False
 
 def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
         verbose = True, seed = 0):
