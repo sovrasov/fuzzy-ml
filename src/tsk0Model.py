@@ -31,16 +31,9 @@ class TSK0():
         return expValues
 
     def getParametersBounds(self):
-        lBound = []
-        uBound = []
-
-        for i in xrange(self.numberOfRules):
-            lBound.extend([0.0]*self.inputDimension)
-            uBound.extend([1.0]*self.inputDimension)
-
-        lBound.extend([0.0] * ((1 + self.inputDimension) * self.numberOfRules))
+        lBound = [0.0]*self.numberOfRules*(1 + 2*self.inputDimension)
+        uBound = [1.0]*self.numberOfRules*self.inputDimension
         uBound.extend([5.0] * ((1 + self.inputDimension) * self.numberOfRules))
-
         return lBound, uBound
 
     def code(self):

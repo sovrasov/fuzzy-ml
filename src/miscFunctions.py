@@ -63,4 +63,4 @@ def loadNormalizedData(path, vecSize, nameToDigit):
         for i in xrange(vecSize):
             vector[i] = (vector[i] - xMin[i]) / (xMax[i] - xMin[i])
 
-    return x, y
+    return np.array(x), np.array(y)
