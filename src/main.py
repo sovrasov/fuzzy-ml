@@ -57,7 +57,7 @@ def main():
         newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
             model.code(), model.getParametersBounds(), args.nParticles, args.seed)
         model.decode(newParams)
-        model.fitWithGradient(xTrain, yTrain)
+        model.fitWithGradient(xTrain, yTrain, True)
         printIf('Testing model...')
         printIf('Train score: {}'.format(model.score(xTrain, yTrain)))
         printIf('Test score: {}'.format(model.score(xTest, yTest)))

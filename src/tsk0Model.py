@@ -84,7 +84,7 @@ class TSK0():
 
     def error(self, x, y):
         errors = [(self.predictRaw(x[i]) - y[i])**2 for i in xrange(len(x))]
-        return np.sum(errors)
+        return np.sum(errors) / len(x)
 
     def predict(self, x):
         return np.ceil(self.predictRaw(x) - 0.5)
@@ -123,9 +123,9 @@ class TSK0():
 
         return deltaA, deltaB, deltaC
 
-    def fitWithGradient(self, x, y):
+    def fitWithGradient(self, x, y, verbose = False):
         maxIters = 150
-        eps = 10e-6
+        eps = 10e-8
         bestScore = self.error(x, y)
         lastBestScore = bestScore*2
         currentScore = bestScore*2
@@ -139,16 +139,19 @@ class TSK0():
             currentScore = self.error(x,y)
 
             divisionsCounter = 0
-            while currentScore > bestScore and divisionsCounter < 10:
+            while currentScore > bestScore and divisionsCounter < 20:
                 eta /= 2.0
                 divisionsCounter += 1
-                self.b += eta*np.array(deltaB)
+                self.b += eta*deltaB
                 for i in xrange(self.numberOfRules):
-                    self.centers[i] += eta*np.array(deltaC[i])
-                    self.vars[i] += eta*np.array(deltaA[i])
+                    self.centers[i] += eta*deltaC[i]
+                    self.vars[i] += eta*deltaA[i]
                 currentScore = self.error(x,y)
             if bestScore > currentScore:
+                if iter % 10 == 0:
+                    printIf('New best value: \t{}'.format(bestScore), verbose)
                 lastBestScore = bestScore
                 bestScore = currentScore
             if np.abs(lastBestScore - bestScore) < eps or currentScore > bestScore:
+                printIf('Optimization finished', verbose)
                 break
