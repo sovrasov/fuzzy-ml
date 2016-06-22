@@ -27,13 +27,15 @@ def main():
     parser.add_argument('-s', '--seed', help='Seed for RNG', \
             type=int, default=1)
     parser.add_argument('-ts', '--testSize', type=float, default=0.2, \
-            help = 'Relative size of test data set')
+            help = 'Relative size of the test data set')
     parser.add_argument('-dp', '--dataPath', type=str, default='../data/iris.data', \
             help = 'Path to file with the iris dataset')
     parser.add_argument('-vm', '--validationMethod', type=str, default='oneshot', \
             help = 'Validation method', choices=[str('oneshot'), str('crossv')])
-    parser.add_argument('-k', '--foldsNumber', type=int, default=4, \
+    parser.add_argument('-k', '--foldsNumber', type=int, default=5, \
             help = 'Number of folds in cross-validation')
+    parser.add_argument('-om', '--optimizationMethod', type=str, default='all', \
+            help = 'Validation method', choices=[str('grad'), str('pso'), str('all')])
     args = parser.parse_args()
 
     nameToDigit = {'Iris-virginica': 1, 'Iris-setosa': 2, 'Iris-versicolor': 3}
@@ -53,11 +55,13 @@ def main():
         printIf('Train score: {}'.format(model.score(xTrain, yTrain)))
         printIf('Test score: {}'.format(model.score(xTest, yTest)))
         printIf('Optimizing model...')
-        initialParams = model.code()
-        newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
-            model.code(), model.getParametersBounds(), args.nParticles, args.seed)
-        model.decode(newParams)
-        model.fitWithGradient(xTrain, yTrain, True)
+        if args.optimizationMethod == str('all') or args.optimizationMethod == str('pso'):
+            initialParams = model.code()
+            newParams = PSO(lambda x: getTSK0Score(model, x, xTrain, yTrain),
+                model.code(), model.getParametersBounds(), args.nParticles, args.seed)
+            model.decode(newParams)
+        if args.optimizationMethod == str('all') or args.optimizationMethod == str('grad'):
+            model.fitWithGradient(xTrain, yTrain, True)
         printIf('Testing model...')
         printIf('Train score: {}'.format(model.score(xTrain, yTrain)))
         printIf('Test score: {}'.format(model.score(xTest, yTest)))

@@ -130,7 +130,7 @@ class TSK0():
         lastBestScore = bestScore*2
         currentScore = bestScore*2
         for iter in xrange(maxIters):
-            eta = (1.0 - float(iter) / maxIters)*0.001
+            eta = (1.0 - float(iter) / maxIters)*0.002
             deltaA, deltaB, deltaC = self.__getGradientOffset(x, y)
             self.b -= eta*deltaB
             for i in xrange(self.numberOfRules):
