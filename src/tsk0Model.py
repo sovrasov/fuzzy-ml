@@ -124,13 +124,15 @@ class TSK0():
         return deltaA, deltaB, deltaC
 
     def fitWithGradient(self, x, y, verbose = False):
-        maxIters = 150
-        eps = 10e-8
+        maxIters = 200
+        iter = 0
+        eps = 10e-7
         bestScore = self.error(x, y)
         lastBestScore = bestScore*2
         currentScore = bestScore*2
-        for iter in xrange(maxIters):
-            eta = (1.0 - float(iter) / maxIters)*0.002
+        while iter < maxIters:
+            iter += 1
+            eta = 0.05 / iter
             deltaA, deltaB, deltaC = self.__getGradientOffset(x, y)
             self.b -= eta*deltaB
             for i in xrange(self.numberOfRules):
@@ -153,5 +155,8 @@ class TSK0():
                 lastBestScore = bestScore
                 bestScore = currentScore
             if np.abs(lastBestScore - bestScore) < eps or currentScore > bestScore:
-                printIf('Optimization finished', verbose)
                 break
+        printIf('-'*50, verbose)
+        printIf('Gradient iterations: \t{}'.format(iter), verbose)
+        printIf('Optimization finished', verbose)
+        printIf('-'*50, verbose)

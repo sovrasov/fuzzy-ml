@@ -39,7 +39,7 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
     maxIterations = 30
     iters = 0
     eps = 10e-3
-    delta = 10e-6
+    delta = 10e-5
     w = 0.8
     c1 = 0.3
     c2 = 0.9
@@ -48,7 +48,7 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
     printIf('Initial best value:\t{}'.format(bestGlobalValue), verbose)
 
     while iters < maxIterations and bestGlobalValue > eps and \
-        (lastBestGlobalValue - bestGlobalValue) > delta:
+        lastBestGlobalValue - bestGlobalValue > delta:
         for i in xrange(numberOfParticles):
             velocities[i] = w*velocities[i] + c1*rndInstance.uniform(0.0,1.0)* \
                     (swarmBest[i] - swarm[i]) + \
@@ -63,6 +63,7 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
         for i in xrange(numberOfParticles):
             currentValue = objectiveFunction(swarm[i])
             if(currentValue < bestGlobalValue):
+                printIf('New best value: \t{}'.format(bestGlobalValue), verbose)
                 lastBestGlobalValue = bestGlobalValue
                 bestGlobalValue = currentValue
                 bestParam = copy.copy(swarm[i])
@@ -70,8 +71,9 @@ def PSO(objectiveFunction, firstPoint, bounds, numberOfParticles = 100,
                 bestValues[i] = currentValue
                 swarmBest[i] = copy.copy(swarm[i])
 
-        printIf('New best value: \t{}'.format(bestGlobalValue), verbose)
         iters += 1
 
+    printIf('-'*50, verbose)
+    printIf('PSO iterations: \t{}'.format(iters), verbose)
     printIf('-'*50, verbose)
     return bestParam
