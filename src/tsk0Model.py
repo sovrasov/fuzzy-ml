@@ -86,6 +86,14 @@ class TSK0():
         errors = [(self.predictRaw(x[i]) - y[i])**2 for i in xrange(len(x))]
         return np.sum(errors) / len(x)
 
+    def __penalty(self):
+        value = 0.0
+        for i in xrange(self.numberOfRules):
+            value += self.b[i]**2
+            value += np.sum(self.centers[i]**2)
+            value += np.sum(self.vars[i]**2)
+        return value
+
     def predict(self, x):
         return np.ceil(self.predictRaw(x) - 0.5)
 
@@ -93,7 +101,7 @@ class TSK0():
         answers = [self.predict(vector) for vector in x]
         return np.where(np.array(answers) == np.array(y))[0].size / float(len(y))
 
-    def __getGradientOffset(self, x, y):
+    def __getGradientOffset(self, x, y, regularity):
         delta = 10e-15
         deltaC = np.array([[0.0]*len(x[0])]*self.numberOfRules)
         deltaB = np.array([0.0]*self.numberOfRules)
@@ -121,9 +129,15 @@ class TSK0():
                 deltaC[i] += deltaC1[i]
                 deltaA[i] += deltaA1[i]
 
+        for i in xrange(self.numberOfRules):
+            deltaA[i] += 2*np.array(self.vars[i])*regularity
+            deltaB[i] += 2*np.array(self.b[i])*regularity
+            deltaC[i] += 2*np.array(self.centers[i])*regularity
+
         return deltaA, deltaB, deltaC
 
     def fitWithGradient(self, x, y, verbose = False):
+        regularity = 0.002
         maxIters = 200
         iter = 0
         eps = 10e-7
@@ -133,12 +147,12 @@ class TSK0():
         while iter < maxIters:
             iter += 1
             eta = 0.05 / iter
-            deltaA, deltaB, deltaC = self.__getGradientOffset(x, y)
+            deltaA, deltaB, deltaC = self.__getGradientOffset(x, y, regularity)
             self.b -= eta*deltaB
             for i in xrange(self.numberOfRules):
                 self.centers[i] -= eta*deltaC[i]
                 self.vars[i] -= eta*deltaA[i]
-            currentScore = self.error(x,y)
+            currentScore = self.error(x,y) + self.__penalty()*regularity
 
             divisionsCounter = 0
             while currentScore > bestScore and divisionsCounter < 20:
@@ -148,7 +162,7 @@ class TSK0():
                 for i in xrange(self.numberOfRules):
                     self.centers[i] += eta*deltaC[i]
                     self.vars[i] += eta*deltaA[i]
-                currentScore = self.error(x,y)
+                currentScore = self.error(x,y) + self.__penalty()*regularity
             if bestScore > currentScore:
                 if iter % 10 == 0:
                     printIf('New best value: \t{}'.format(bestScore), verbose)
